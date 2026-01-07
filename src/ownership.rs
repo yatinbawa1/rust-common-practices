@@ -36,3 +36,116 @@ pub fn imp_exp_ref() {
 
 	println!("Implicit: {k}  Explicit: {z}");
 }
+
+// rust want to compile a program
+// that requires as little runtime checks as possible
+// about 70% vulnerabilities in lower level systems are caused by memory corruption
+
+pub fn enums()  {
+	// enums
+	enum Pet {
+		Dog(usize),
+		Cat(usize),
+	}
+
+	enum PetName {
+		Dog(String),
+	}
+
+	let pet1 = Pet::Cat(22);
+	let pet2 = Pet::Dog(3);
+
+	// pattern-matching
+	// This is the way to extract / destruct value from a
+	// enum based on its kind
+
+	let Pet::Cat(age) = pet1 else {
+		// this is not a set value of age
+		// as whatever is inside else type of
+		// situation
+		// This is more like error handler
+		// whatever happens inside else should block further
+		// execution of code
+		return;
+	};
+	println!("{age}");
+
+	let Pet::Dog(age2) = pet2 else {
+		return;
+	};
+	println!("{age2}");
+
+	let Pet::Cat(age4) = pet1 else {
+		return;
+	};
+	println!("{age4}");
+
+	let brownie = PetName::Dog("brownie".to_string());
+	let PetName::Dog(name1) = brownie else {
+		return;
+	};
+
+	// This Particular will not work
+	// because value this destructuring does not
+	// use Copy like usize, so it actually moves
+	// value ownership from brownie to name, trying
+	// to access brownie again is not possible as
+	// it does not contain the value
+	// let PetName::Dog(name2) = brownie else {
+	//     return;
+	// };
+
+	// Allocating Memory
+	// the data *moves* from owner to newOwner
+	let new_owner = allocating_heap(5);
+	println!("{:?}", new_owner);
+
+	function_reference();
+	function_reference_using_reference();
+
+	// this will not print because before this
+	// the program would have returned because of wrong pattern-matching
+	let Pet::Cat(age3) = pet2 else {
+		panic!("This is not a Cat!");
+	};
+
+	println!("{age3}");
+
+}
+
+fn allocating_heap(size: usize) -> Box<Vec<usize>> {
+
+	// a piece of memory can be
+	// allocated in heap using Box::New()
+
+	let array_in_stock: Vec<usize> = (0..size).collect();
+	let owner = Box::new(array_in_stock);
+
+	owner
+}
+
+// References
+// It would be inconvenient to always reassign
+// a variable that does not implement copy after passing
+// it to a program
+fn function_reference(){
+	let value1 = String::from("Hello");
+	let value2 = function_reference_passing(value1);
+	// The following line would not work because value1 has been moved
+	// println!("value1 = {}. value2 = {}", value1, value2);
+}
+
+fn function_reference_passing(mut value: String) -> String {
+	value.push_str(" World!");
+	value
+}
+
+fn function_reference_using_reference() {
+	let mut value = String::from("Hello");
+	function_reference_using_reference_passing(&mut value);
+	println!("{}", value);
+}
+
+fn function_reference_using_reference_passing(value: &mut String) {
+	value.push_str(" World!");
+}
