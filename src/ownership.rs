@@ -11,7 +11,8 @@ pub fn ref_pointers() {
 	// *num_ref = 25; cannot do that because &num[1] is not assigned as mutable, even if _num_ref is mut.
 	println!("Borrowed num_ref 1: {}",num_ref);
 	println!("Before Changing Anything: {:#?}", &num);
-	num_ref = &mut num[2]; // changing num_ref to a mut reference (also known as unique references)
+	num_ref = &mut num[2]; // changing num_ref to a mut reference (also known as unique references), num loses all permissions
+	// println!("Will not be able to print: {:#?}", num);
 	println!("Borrowed num_ref 2: {}",num_ref);
 	// *num_ref = 4; -> this would not work because num_ref is still immutable i32, assignment works because of coercion
 	// coercion: rust allow some values to be downgraded &mut T -> &T, because it is always safe
@@ -121,6 +122,8 @@ fn allocating_heap(size: usize) -> Box<Vec<usize>> {
 	let array_in_stock: Vec<usize> = (0..size).collect();
 	let owner = Box::new(array_in_stock);
 
+	// moving ownership of box
+
 	owner
 }
 
@@ -146,6 +149,61 @@ fn function_reference_using_reference() {
 	println!("{}", value);
 }
 
-fn function_reference_using_reference_passing(value: &mut String) {
+fn function_reference_using_reference_passing(value: &mut String)
+{
 	value.push_str(" World!");
+}
+
+
+// flow permission is given when a fn has input like &strings[0]
+// or output like first
+// it does not change throughout function
+
+fn f_permission(strings: &Vec<String>) -> &String {
+	let first = &strings[0];
+	first
+}
+
+// This will not compile because the strings and default lack flow permissions
+// fn first_or<'a, 'b, 'c>(strings: &'a Vec<String>, default: &'b String) -> &'c String {
+// 	if strings.len() > 0 {
+// 		&strings[0]
+// 	} else {
+// 		default
+// 	}
+// }
+
+
+// Arrays in Rust have only 1 permission for all element -> [_]. If one of them loses them, all of them
+// loses them for times like these, rust provides Standard Library functions
+// that work around these borrower barriers
+
+// TODO: Fix this search
+pub fn binary_search_array_split(search_values: &mut [i32], search_term: i32, index: i32) -> i32 {
+
+	if(search_values.is_empty()) {
+			return -1
+	}
+
+	let high:i32 = search_values.len() as i32;
+	let mid: i32 = high / 2;
+	let mid_value: i32 = search_values[mid as usize];
+
+	// this is how you split an array to use multiple
+	// index references.
+	let (array_low,array_high) = search_values.split_at_mut(mid as usize);
+
+	let mut a_low = &mut &array_low[0];
+	let mut a_high = &mut &array_high[array_high.len() - 1];
+	println!("Highest Point this cycle is: {a_high} Lowest Point this cycle is: {a_low}");
+
+	// could just pass the array, forgo the split
+	// and use mid but that does not tell me much about splitting
+	return if mid_value == search_term {
+		index + mid
+	} else if (mid > search_term) {
+		binary_search_array_split(array_low, search_term, 0)
+	} else {
+		binary_search_array_split(array_high, search_term,mid)
+	}
 }
