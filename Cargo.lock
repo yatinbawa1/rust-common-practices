@@ -5,3 +5,12 @@ version = 4
 [[package]]
 name = "common_concepts"
 version = "0.1.0"
+dependencies = [
+ "ordinal",
+]
+
+[[package]]
+name = "ordinal"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04f7ff16c3a0599da7939ad0ae9300414ca1115a7f552574bb269638a1e0576d"

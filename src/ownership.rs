@@ -179,31 +179,33 @@ fn f_permission(strings: &Vec<String>) -> &String {
 // that work around these borrower barriers
 
 // TODO: Fix this search
-pub fn binary_search_array_split(search_values: &mut [i32], search_term: i32, index: i32) -> i32 {
+pub fn binary_search_array_split(search_values: &mut [i32], search_term: i32, index: usize) -> i32 {
 
-	if(search_values.is_empty()) {
-			return -1
+
+	let len = search_values.len() - 1;
+	let mid_idx = len / 2;
+	let middle_value  =  search_values[mid_idx];
+
+	if(len == 0){
+		if (middle_value == search_term){
+			return (mid_idx + index) as i32;
+		}
+		return -1;
 	}
-
-	let high:i32 = search_values.len() as i32;
-	let mid: i32 = high / 2;
-	let mid_value: i32 = search_values[mid as usize];
 
 	// this is how you split an array to use multiple
 	// index references.
-	let (array_low,array_high) = search_values.split_at_mut(mid as usize);
+	let (array_low, array_high) = search_values.split_at_mut(mid_idx + 1);
 
 	let mut a_low = &mut &array_low[0];
 	let mut a_high = &mut &array_high[array_high.len() - 1];
 	println!("Highest Point this cycle is: {a_high} Lowest Point this cycle is: {a_low}");
 
-	// could just pass the array, forgo the split
-	// and use mid but that does not tell me much about splitting
-	return if mid_value == search_term {
-		index + mid
-	} else if (mid > search_term) {
-		binary_search_array_split(array_low, search_term, 0)
+	if middle_value == search_term {
+		(mid_idx + index) as i32
+	} else if (middle_value > search_term) {
+		binary_search_array_split(array_low, search_term, index)
 	} else {
-		binary_search_array_split(array_high, search_term,mid)
+		binary_search_array_split(array_high, search_term, mid_idx + index + 1)
 	}
 }
