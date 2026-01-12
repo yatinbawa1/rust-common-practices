@@ -1,3 +1,6 @@
+use crate::ownership;
+
+use ordinal::ToOrdinal as _;
 pub fn ref_pointers() {
 	// rust prevents aliasing and mutation at same time
 	// It can be a problem because One variable can “pull the rug out” from another variable in many ways, for example
@@ -178,8 +181,20 @@ fn f_permission(strings: &Vec<String>) -> &String {
 // loses them for times like these, rust provides Standard Library functions
 // that work around these borrower barriers
 
+pub fn run_binary_search() {
+	let mut array = [132,1,43,53,26,74,9];
+	array.sort();
+	println!("Original Array: {:?}",array);
+	let search_values: &mut [i32] = &mut array;
+	let where_is_it = binary_search_array_split(search_values,74,0);
+	if(where_is_it == -1) {
+		println!("Cannot find the item!");
+	}else {
+		println!("Found the item at {} place!",where_is_it.to_ordinal_string());
+	}
+}
 // TODO: Fix this search
-pub fn binary_search_array_split(search_values: &mut [i32], search_term: i32, index: usize) -> i32 {
+fn binary_search_array_split(search_values: &mut [i32], search_term: i32, index: usize) -> i32 {
 
 
 	let len = search_values.len() - 1;
